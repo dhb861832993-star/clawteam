@@ -34,6 +34,8 @@
 - **OpenClaw CLI** 已安装并配置
 - 运行中的 OpenClaw Gateway
 
+> 💡 **Windows 用户**：本项目完全支持 Windows 10/11。请先安装 [Node.js](https://nodejs.org/) 和 [Git for Windows](https://git-scm.com/download/win)，然后使用 PowerShell 或 CMD 执行以下命令。OpenClaw CLI 可通过 `npm install -g openclaw` 安装，或从源码运行。
+
 #### 安装步骤
 
 ```bash
