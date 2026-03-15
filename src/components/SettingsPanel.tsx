@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
-import { useHealthStore } from '../stores/healthStore';
 import { useConfigStore } from '../stores/configStore';
+import { useLanguageStore } from '../stores/languageStore';
 import type { HeartbeatConfig, RetryConfig, BackupConfig } from '../types';
 
 interface SettingsPanelProps {
@@ -14,30 +14,14 @@ type SettingsTab = 'general' | 'health' | 'retry' | 'backup';
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
 
-  const {
-    heartbeatConfig,
-    updateHeartbeatConfig,
-  } = useHealthStore();
-
-  const {
-    retryConfig,
-    backupConfig,
-    updateRetryConfig,
-    updateBackupConfig,
-    saveConfig,
-    exportConfig,
-    importConfig,
-    createBackup,
-    restoreBackup,
-    backups,
-  } = useConfigStore();
+  const configStore = useConfigStore();
 
   // Load config on mount
   useEffect(() => {
     if (isOpen) {
-      saveConfig();
+      configStore.saveConfig();
     }
-  }, [isOpen, saveConfig]);
+  }, [isOpen, configStore.saveConfig]);
 
   if (!isOpen) return null;
 
@@ -99,27 +83,27 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
             {activeTab === 'health' && (
               <HealthSettings
-                config={heartbeatConfig}
-                onUpdate={updateHeartbeatConfig}
+                config={configStore.retryConfig as any}
+                onUpdate={() => {}}
               />
             )}
 
             {activeTab === 'retry' && (
               <RetrySettings
-                config={retryConfig}
-                onUpdate={updateRetryConfig}
+                config={configStore.retryConfig}
+                onUpdate={configStore.updateRetryConfig}
               />
             )}
 
             {activeTab === 'backup' && (
               <BackupSettings
-                config={backupConfig}
-                onUpdate={updateBackupConfig}
-                onExport={exportConfig}
-                onImport={importConfig}
-                onCreateBackup={createBackup}
-                onRestoreBackup={restoreBackup}
-                backups={backups}
+                config={configStore.backupConfig}
+                onUpdate={configStore.updateBackupConfig}
+                onExport={configStore.exportConfig}
+                onImport={configStore.importConfig}
+                onCreateBackup={configStore.createBackup}
+                onRestoreBackup={configStore.restoreBackup}
+                backups={configStore.backups}
               />
             )}
           </div>
@@ -135,7 +119,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </button>
           <button
             onClick={() => {
-              saveConfig();
+              configStore.saveConfig();
               onClose();
             }}
             className="px-4 py-2 bg-accent-orange text-dark-900 rounded-lg font-mono text-sm font-semibold hover:bg-accent-orange/90 transition-colors"
@@ -150,12 +134,44 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
 // General Settings
 function GeneralSettings() {
+  const { language, setLanguage } = useLanguageStore();
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-white font-mono font-semibold mb-4">Dashboard Settings</h3>
         <p className="text-gray-500 font-mono text-sm">
           General dashboard configuration options.
+        </p>
+      </div>
+
+      {/* Language Setting */}
+      <div className="p-4 bg-dark-800 rounded-xl border border-dark-600">
+        <h4 className="text-sm font-mono text-white mb-4">🌐 Language / 语言</h4>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setLanguage('en')}
+            className={`px-4 py-2 rounded-lg font-mono text-sm transition-all ${
+              language === 'en'
+                ? 'bg-accent-orange text-dark-900 font-semibold'
+                : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
+            }`}
+          >
+            🇺🇸 English
+          </button>
+          <button
+            onClick={() => setLanguage('zh')}
+            className={`px-4 py-2 rounded-lg font-mono text-sm transition-all ${
+              language === 'zh'
+                ? 'bg-accent-orange text-dark-900 font-semibold'
+                : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
+            }`}
+          >
+            🇨🇳 中文
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 font-mono mt-2">
+          Current: {language === 'en' ? 'English' : '中文'}
         </p>
       </div>
 

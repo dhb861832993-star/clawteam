@@ -47,6 +47,7 @@ export function TeamsPanel({ isOpen, onClose }: TeamsPanelProps) {
 
   const handleSwitchTeam = async (teamId: string) => {
     await switchTeam(teamId);
+    onClose(); // 切换团队后关闭面板
   };
 
   if (!isOpen) return null;
