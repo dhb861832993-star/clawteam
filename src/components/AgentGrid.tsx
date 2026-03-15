@@ -59,7 +59,7 @@ export function AgentGrid() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="agent-panel">
       <div className="text-xs text-gray-500 font-mono tracking-widest flex items-center justify-between">
         <span>AGENT NETWORK</span>
         <span className="text-accent-green">{agents.length} 在线</span>

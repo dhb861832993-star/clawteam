@@ -1,4 +1,7 @@
-import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer } from './components';
+import { useState, useEffect } from 'react';
+import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer, SkillsPanel, CommunicationPanel, SettingsPanel, TeamsPanel } from './components';
+import { useTeamStore } from './stores/teamStore';
+import { useHealthStore } from './stores/healthStore';
 
 // Mock task steps
 const mockSteps = [
@@ -11,10 +14,38 @@ const mockSteps = [
 ];
 
 function App() {
+  const [showSkills, setShowSkills] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showCommunication, setShowCommunication] = useState(false);
+  const [showTeams, setShowTeams] = useState(false);
+
+  const { teams, currentTeamId, loadTeams } = useTeamStore();
+  const { startMonitoring, stopMonitoring } = useHealthStore();
+
+  // Load teams on mount
+  useEffect(() => {
+    loadTeams();
+  }, [loadTeams]);
+
+  // Start health monitoring on mount
+  useEffect(() => {
+    startMonitoring();
+    return () => stopMonitoring();
+  }, [startMonitoring, stopMonitoring]);
+
+  // Get current team name
+  const currentTeam = teams.find(t => t.id === currentTeamId);
+  const currentTeamName = currentTeam?.name;
+
   return (
-    <div className="min-h-screen bg-dark-900 bg-grid">
+    <main className="min-h-screen bg-dark-900 bg-grid">
       {/* Header */}
-      <Header />
+      <Header
+        onOpenSkills={() => setShowSkills(true)}
+        onOpenSettings={() => setShowSettings(true)}
+        onOpenTeams={() => setShowTeams(true)}
+        currentTeamName={currentTeamName}
+      />
 
       {/* Main Content */}
       <div className="flex p-6 gap-6">
@@ -31,8 +62,41 @@ function App() {
           {/* Agent Grid */}
           <AgentGrid />
 
-          {/* Mode Legend */}
+          {/* Quick Actions */}
           <div className="mt-8 p-5 bg-dark-800 rounded-xl border border-dark-600">
+            <h3 className="text-xs font-mono text-accent-orange font-semibold mb-3">
+              🚀 Quick Actions
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setShowSkills(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                🧩 Skills
+              </button>
+              <button
+                onClick={() => setShowCommunication(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                🔗 Communication
+              </button>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                ⚙️ Settings
+              </button>
+              <button
+                onClick={() => setShowTeams(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                👥 Teams
+              </button>
+            </div>
+          </div>
+
+          {/* Mode Legend */}
+          <div className="mt-4 p-5 bg-dark-800 rounded-xl border border-dark-600">
             <h3 className="text-xs font-mono text-accent-orange font-semibold mb-3">
               💡 智能模式切换
             </h3>
@@ -57,9 +121,21 @@ function App() {
         <RightPanel />
       </div>
 
+      {/* Skills Panel Modal */}
+      <SkillsPanel isOpen={showSkills} onClose={() => setShowSkills(false)} />
+
+      {/* Communication Panel Modal */}
+      <CommunicationPanel isOpen={showCommunication} onClose={() => setShowCommunication(false)} />
+
+      {/* Settings Panel Modal */}
+      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+
+      {/* Teams Panel Modal */}
+      <TeamsPanel isOpen={showTeams} onClose={() => setShowTeams(false)} />
+
       {/* Toast Notifications */}
       <ToastContainer />
-    </div>
+    </main>
   );
 }
 

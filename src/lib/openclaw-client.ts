@@ -310,7 +310,6 @@ export class OpenClawClient {
 
           // Extract the response text from the agent reply
           const responseText = data.result?.payloads?.[0]?.text || '';
-          const sessionId = data.result?.meta?.agentMeta?.sessionId || '';
 
           resolve({
             ok: data.status === 'ok',

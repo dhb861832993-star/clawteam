@@ -71,3 +71,116 @@ export interface AgentFile {
   content: string;
   lastModified: Date;
 }
+
+// ============= Phase 2: Skills Management =============
+
+// Skill 定义
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  author?: string;
+  enabled: boolean;
+  installed: boolean;
+  source: 'builtin' | 'clawhub' | 'local';
+  category?: string;
+  tags?: string[];
+  config?: Record<string, unknown>;
+}
+
+// ClawHub Skill 列表项
+export interface ClawHubSkill {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  author: string;
+  downloads: number;
+  rating: number;
+  category: string;
+  tags: string[];
+}
+
+// ============= Phase 2: Communication Scope =============
+
+// 通信权限
+export type CommunicationPermission = 'readonly' | 'readwrite' | 'full';
+
+// 通信范围项
+export interface CommunicationScope {
+  agentId: string;
+  agentName: string;
+  permission: CommunicationPermission;
+  addedAt: Date;
+  lastInteraction?: Date;
+}
+
+// ============= Phase 2: Health Check =============
+
+// 健康状态
+export interface HealthStatus {
+  agentId: string;
+  isOnline: boolean;
+  lastHeartbeat: Date | null;
+  responseTime: number | null; // ms
+  errorCount: number;
+  lastError?: string;
+}
+
+// 心跳配置
+export interface HeartbeatConfig {
+  enabled: boolean;
+  interval: number; // seconds
+  timeout: number; // seconds
+  retryCount: number;
+}
+
+// ============= Phase 2: Configuration =============
+
+// 应用配置
+export interface AppConfig {
+  theme: 'dark' | 'light';
+  language: 'zh' | 'en';
+  heartbeat: HeartbeatConfig;
+  retry: RetryConfig;
+  backup: BackupConfig;
+}
+
+// 重试配置
+export interface RetryConfig {
+  enabled: boolean;
+  maxRetries: number;
+  retryInterval: number; // seconds
+  exponentialBackoff: boolean;
+}
+
+// 备份配置
+export interface BackupConfig {
+  enabled: boolean;
+  autoBackup: boolean;
+  backupInterval: number; // hours
+  maxBackups: number;
+  lastBackup?: Date;
+}
+
+// ============= Phase 2: Multi-Team =============
+
+// 团队定义
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  agents: string[]; // Agent IDs
+  createdAt: Date;
+  updatedAt: Date;
+  isActive: boolean;
+}
+
+// 团队切换状态
+export interface TeamSwitchState {
+  previousTeamId: string | null;
+  currentTeamId: string;
+  pendingTasks: string[];
+  switchedAt: Date;
+}
