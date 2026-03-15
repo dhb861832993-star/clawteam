@@ -34,6 +34,7 @@ export interface Config {
   // Gateway WebSocket configuration
   gateway: {
     url: string;              // WebSocket URL for Gateway
+    token: string;            // Gateway auth token
     reconnectInterval: number;
     requestTimeout: number;
   };
@@ -86,6 +87,7 @@ function buildConfig(): Config {
 
     gateway: {
       url: getEnv('OPENCLAW_GATEWAY_URL', 'ws://127.0.0.1:18789'),
+      token: getEnv('OPENCLAW_GATEWAY_TOKEN', ''),
       reconnectInterval: getEnvNumber('OPENCLAW_GATEWAY_RECONNECT_INTERVAL', 5000),
       requestTimeout: getEnvNumber('OPENCLAW_GATEWAY_REQUEST_TIMEOUT', 30000),
     },

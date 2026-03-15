@@ -1,4 +1,4 @@
-import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel } from './components';
+import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer } from './components';
 
 // Mock task steps
 const mockSteps = [
@@ -56,6 +56,9 @@ function App() {
         {/* Right Side - Panel */}
         <RightPanel />
       </div>
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }

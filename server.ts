@@ -98,15 +98,25 @@ app.post('/api/agents/:agentId/send', async (req, res) => {
     const { agentId } = req.params;
     const { message, sessionKey } = req.body;
 
+    console.log('[API] Send message request:', { agentId, messageLength: message?.length, sessionKey });
+
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
     const result = await openclaw.sendMessage(agentId, message, sessionKey);
+    console.log('[API] Send message result:', JSON.stringify(result).substring(0, 200));
     res.json(result);
   } catch (error) {
     console.error('[API] Failed to send message:', error);
-    res.status(500).json({ error: 'Failed to send message' });
+    if (error instanceof OpenClawError) {
+      return res.status(500).json({
+        error: error.message,
+        code: error.code,
+        details: error.details
+      });
+    }
+    res.status(500).json({ error: 'Failed to send message', details: String(error) });
   }
 });
 

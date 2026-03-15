@@ -293,7 +293,7 @@ export async function fetchAgentsList(): Promise<Array<{
   identityName?: string;
   identityEmoji?: string;
   workspace: string;
-  agentDir: string;
+  agentDir?: string;
   model: string;
   bindings: number;
   isDefault: boolean;

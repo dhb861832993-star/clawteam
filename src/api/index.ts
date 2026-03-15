@@ -43,7 +43,7 @@ interface OpenClawAgent {
   identityName?: string;
   identityEmoji?: string;
   workspace: string;
-  agentDir: string;
+  agentDir?: string;
   model: string;
   bindings: number;
   isDefault: boolean;
@@ -58,6 +58,28 @@ interface SessionData {
   age: number;
   totalTokens: number | null;
   model: string;
+}
+
+// Status response from Gateway
+export interface StatusResponse {
+  runtimeVersion: string;
+  heartbeat: {
+    defaultAgentId: string;
+    agents: Array<{
+      agentId: string;
+      enabled: boolean;
+      every: string;
+    }>;
+  };
+  sessions: {
+    count: number;
+    recent: SessionData[];
+    byAgent: Array<{
+      agentId: string;
+      count: number;
+      recent: SessionData[];
+    }>;
+  };
 }
 
 // Get all agents from OpenClaw
@@ -118,8 +140,8 @@ export async function fetchGatewayHealth() {
 }
 
 // Get gateway status
-export async function fetchGatewayStatus() {
-  return apiGet('/gateway/status');
+export async function fetchGatewayStatus(): Promise<StatusResponse> {
+  return apiGet<StatusResponse>('/gateway/status');
 }
 
 // Send message to agent

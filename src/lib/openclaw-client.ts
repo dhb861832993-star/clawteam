@@ -5,7 +5,7 @@
  * Handles command execution, error handling, and connection management.
  */
 
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import type { Config } from '../config';
 
@@ -127,9 +127,14 @@ export class OpenClawClient {
   /**
    * Execute an OpenClaw CLI command
    */
-  private async execCommand(args: string): Promise<string> {
+  private async execCommand(args: string, addToken = false): Promise<string> {
     const { command, timeout } = this.config.openclaw;
-    const fullCommand = `${command} ${args}`;
+    const { token } = this.config.gateway;
+
+    let fullCommand = `${command} ${args}`;
+    if (addToken && token) {
+      fullCommand += ` --token "${token}"`;
+    }
 
     try {
       const { stdout, stderr } = await execAsync(fullCommand, {
@@ -208,7 +213,7 @@ export class OpenClawClient {
    */
   async getHealth(): Promise<HealthResponse> {
     try {
-      const stdout = await this.execCommand('gateway call health --json');
+      const stdout = await this.execCommand('gateway call health --json', true);
       return JSON.parse(stdout);
     } catch (error) {
       console.error('[OpenClaw] Failed to get health:', error);
@@ -221,7 +226,7 @@ export class OpenClawClient {
    */
   async getStatus(): Promise<StatusResponse> {
     try {
-      const stdout = await this.execCommand('gateway call status --json');
+      const stdout = await this.execCommand('gateway call status --json', true);
       return JSON.parse(stdout);
     } catch (error) {
       console.error('[OpenClaw] Failed to get status:', error);
@@ -230,37 +235,99 @@ export class OpenClawClient {
   }
 
   /**
-   * Send a message to an agent
+   * Send a message to an agent using spawn for safe parameter passing
    */
   async sendMessage(
     agentId: string,
     message: string,
     sessionKey?: string
   ): Promise<SendMessageResult> {
-    try {
-      // Escape quotes in message
-      const escapedMessage = message.replace(/"/g, '\\"');
+    const { command } = this.config.openclaw;
 
-      // Build params
-      const params: Record<string, string> = {
-        agentId,
-        text: escapedMessage,
-      };
+    console.log('[OpenClaw] Sending message to agent:', agentId);
+    console.log('[OpenClaw] Message length:', message.length);
+
+    return new Promise((resolve, reject) => {
+      // Build args for 'openclaw agent' command
+      const args = [
+        'agent',
+        '--agent', agentId,
+        '--message', message,
+        '--json'
+      ];
+
+      // Add session if provided
       if (sessionKey) {
-        params.sessionKey = sessionKey;
+        args.push('--session-id', sessionKey);
       }
 
-      const paramsStr = JSON.stringify(params);
-      const stdout = await this.execCommand(
-        `gateway call agent.send --params '${paramsStr}' --expect-final --timeout 60000`
-      );
+      console.log('[OpenClaw] Command:', command, args.join(' '));
 
-      const result = JSON.parse(stdout);
-      return result;
-    } catch (error) {
-      console.error(`[OpenClaw] Failed to send message to ${agentId}:`, error);
-      throw error;
-    }
+      const child = spawn(command, args);
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', (data) => {
+        const text = data.toString();
+        stderr += text;
+        // Log stderr in real-time for debugging
+        if (!text.includes('🦞')) {
+          console.error('[OpenClaw stderr]', text.trim());
+        }
+      });
+
+      child.on('error', (error) => {
+        console.error('[OpenClaw] Process error:', error);
+        reject(new OpenClawError(
+          `Failed to spawn process: ${error.message}`,
+          'SPAWN_ERROR',
+          { agentId, error }
+        ));
+      });
+
+      child.on('close', (code) => {
+        console.log('[OpenClaw] Process exited with code:', code);
+        console.log('[OpenClaw] stdout length:', stdout.length);
+
+        if (code !== 0) {
+          console.error('[OpenClaw] Full stderr:', stderr);
+          reject(new OpenClawError(
+            `Command failed with code ${code}: ${stderr}`,
+            'COMMAND_FAILED',
+            { agentId, code, stderr, stdout }
+          ));
+          return;
+        }
+
+        try {
+          const data = JSON.parse(stdout);
+          console.log('[OpenClaw] Result status:', data.status);
+
+          // Extract the response text from the agent reply
+          const responseText = data.result?.payloads?.[0]?.text || '';
+          const sessionId = data.result?.meta?.agentMeta?.sessionId || '';
+
+          resolve({
+            ok: data.status === 'ok',
+            response: responseText,
+            error: data.status !== 'ok' ? data.summary : undefined,
+          });
+        } catch (parseError) {
+          console.error('[OpenClaw] JSON parse error:', parseError);
+          console.error('[OpenClaw] Raw stdout:', stdout.substring(0, 500));
+          reject(new OpenClawError(
+            `Failed to parse response: ${stdout.substring(0, 100)}`,
+            'PARSE_ERROR',
+            { agentId, stdout: stdout.substring(0, 500) }
+          ));
+        }
+      });
+    });
   }
 
   /**

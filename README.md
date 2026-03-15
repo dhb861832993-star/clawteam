@@ -38,8 +38,8 @@
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/anthropics/openclaw-agent-dashboard.git
-cd openclaw-agent-dashboard
+git clone https://github.com/dhb861832993-star/clawteam.git
+cd clawteam
 
 # 2. 安装依赖
 npm install
@@ -132,8 +132,9 @@ npm run lint         # 运行 ESLint 检查
 
 ### 相关项目
 
-- [OpenClaw](https://github.com/anthropics/openclaw) - AI Agent 框架
+- [OpenClaw](https://github.com/openclaw/openclaw) - AI Agent 框架
 - [Claude Code](https://github.com/anthropics/claude-code) - Claude CLI 工具
+- [clawteam](https://github.com/dhb861832993-star/clawteam) - 本项目
 
 ---
 

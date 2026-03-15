@@ -7,10 +7,60 @@
 
 ## [Unreleased]
 
-### 新增
+## [1.0.0] - 2026-03-15
 
-- 完善开源文档体系
-- 添加自动配置检测脚本
+### ✨ 新增 - Phase 1 MVP 完成
+
+**核心功能**
+- **Agent 网格展示** - 6 个 Agent 卡片（🐻🦁🐱🦉🦜🐜 动物头像）
+- **任务流可视化** - 进度条 + 状态指示器（60% 进度）
+- **右侧三模式面板**
+  - 💬 对话模式 - 与 Agent 实时聊天（发送 + 接收）
+  - ⚙️ 属性模式 - 查看/编辑 MD 配置文件（SOUL.md、AGENTS.md 等）
+  - 📋 日志模式 - 实时系统日志 + 筛选
+- **Monaco MD 文件编辑器** - 代码高亮 + 行号 + 保存功能
+- **OpenClawClient 封装** - 统一的 API 客户端（sendMessage/readFile/writeFile）
+- **Zustand 状态管理** - 轻量级状态管理 + 轮询同步
+- **配置化架构** - 支持环境变量配置，可开源给别人使用
+- **自动检测脚本** - `scripts/detect-openclaw.js` 一键生成配置
+
+**UI 设计**
+- UI v10 定稿（废土科幻风格）
+- 动物头像设计（🦁队长 🐻大熊 🐱设计师 🦉分析师 🦜写手 🐜操作员）
+- 响应式布局
+- 深色主题 + 橙色强调色
+
+**文档体系**（8 个文件，50+ KB）
+- README.md（中英双语）
+- docs/installation.md - 详细安装指南
+- docs/configuration.md - 配置说明
+- docs/usage.md - 使用教程
+- docs/development.md - 开发指南
+- docs/faq.md - 常见问题
+- CONTRIBUTING.md - 贡献指南
+
+### 🐛 修复
+- 修复 OpenClaw API 调用错误（`gateway call agent.send` → `agent --agent --message`）
+- 修复消息发送 500 错误
+- 改进错误处理和日志输出（使用 spawn 替代 exec）
+- 添加 Gateway Token 支持
+
+### 👥 贡献者
+- 👤 多来 A 梦（需求方）
+- 🐻 大熊（main agent/协调）
+- 🎨 设计师（UI 设计，v10 定稿）
+- 📊 分析师（PRD 文档）
+- 💻 Claude Code（代码实现 + 推送）
+
+### 📦 技术栈
+- 前端：React 19 + Vite 8 + TypeScript 5
+- UI：Tailwind CSS 3 + shadcn/ui
+- 状态管理：Zustand 5
+- 代码编辑：Monaco Editor 4
+- 后端：Express 5 + tsx
+- 实时通信：WebSocket
+
+[1.0.0]: https://github.com/dhb861832993-star/clawteam/releases/tag/v1.0.0
 
 ## [0.1.0] - 2024-01-15
 
