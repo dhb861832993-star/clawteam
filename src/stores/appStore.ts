@@ -66,6 +66,35 @@ interface AppState {
 let agentPollingInterval: ReturnType<typeof setInterval> | null = null;
 let logPollingInterval: ReturnType<typeof setInterval> | null = null;
 
+// Load persisted messages from localStorage
+const getPersistedMessages = (): Record<string, Message[]> => {
+  try {
+    const stored = localStorage.getItem('chat-messages');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Convert timestamp strings back to Date objects
+      for (const agentId in parsed) {
+        parsed[agentId] = parsed[agentId].map((msg: Message) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+      return parsed;
+    }
+  } catch (e) {
+    console.error('Failed to load persisted messages:', e);
+  }
+  return {};
+};
+
+const saveMessagesToStorage = (messagesByAgent: Record<string, Message[]>) => {
+  try {
+    localStorage.setItem('chat-messages', JSON.stringify(messagesByAgent));
+  } catch (e) {
+    console.error('Failed to save messages:', e);
+  }
+};
+
 export const useAppStore = create<AppState>((set, get) => ({
   // Agents
   agents: [],
@@ -76,14 +105,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectAgent: (id) => {
     const state = get();
     set({ selectedAgentId: id });
-    
+
     // Load messages for the selected agent
     if (id && state.messagesByAgent[id]) {
       set({ messages: state.messagesByAgent[id] });
     } else {
       set({ messages: [] });
     }
-    
+
     // Load the default file for the selected agent
     if (id) {
       get().loadAgentFile(id, 'SOUL.md');
@@ -148,21 +177,23 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // Messages
   messages: [],
-  messagesByAgent: {},
+  messagesByAgent: getPersistedMessages(),
   addMessage: (message) => {
     const state = get();
     const agentId = state.selectedAgentId || 'unknown';
-    
+
     // Update global messages
     set((state) => ({ messages: [...state.messages, message] }));
-    
-    // Update messages by agent
-    set((state) => ({
-      messagesByAgent: {
+
+    // Update messages by agent and save to localStorage
+    set((state) => {
+      const newMessagesByAgent = {
         ...state.messagesByAgent,
         [agentId]: [...(state.messagesByAgent[agentId] || []), message],
-      },
-    }));
+      };
+      saveMessagesToStorage(newMessagesByAgent);
+      return { messagesByAgent: newMessagesByAgent };
+    });
   },
   sendChatMessage: async (agentId: string, message: string) => {
     const state = get();
@@ -178,14 +209,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       timestamp: new Date(),
     };
     set((state) => ({ messages: [...state.messages, userMessage] }));
-    
+
     // Also save to agent-specific messages
-    set((state) => ({
-      messagesByAgent: {
+    set((state) => {
+      const newMessagesByAgent = {
         ...state.messagesByAgent,
         [agentId]: [...(state.messagesByAgent[agentId] || []), userMessage],
-      },
-    }));
+      };
+      saveMessagesToStorage(newMessagesByAgent);
+      return { messagesByAgent: newMessagesByAgent };
+    });
 
     try {
       const response = await sendMessageToAgent(agentId, message);
@@ -200,14 +233,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         timestamp: new Date(),
       };
       set((state) => ({ messages: [...state.messages, agentMessage] }));
-      
+
       // Also save to agent-specific messages
-      set((state) => ({
-        messagesByAgent: {
+      set((state) => {
+        const newMessagesByAgent = {
           ...state.messagesByAgent,
           [agentId]: [...(state.messagesByAgent[agentId] || []), agentMessage],
-        },
-      }));
+        };
+        saveMessagesToStorage(newMessagesByAgent);
+        return { messagesByAgent: newMessagesByAgent };
+      });
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       // Add error message
@@ -220,14 +255,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         timestamp: new Date(),
       };
       set((state) => ({ messages: [...state.messages, errorMessage] }));
-      
+
       // Also save to agent-specific messages
-      set((state) => ({
-        messagesByAgent: {
+      set((state) => {
+        const newMessagesByAgent = {
           ...state.messagesByAgent,
           [agentId]: [...(state.messagesByAgent[agentId] || []), errorMessage],
-        },
-      }));
+        };
+        saveMessagesToStorage(newMessagesByAgent);
+        return { messagesByAgent: newMessagesByAgent };
+      });
       toast.error(`Failed to send message: ${errorMsg}`);
     }
   },
