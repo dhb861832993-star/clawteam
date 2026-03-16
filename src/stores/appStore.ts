@@ -329,12 +329,13 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // File tabs
   fileTabs: ['SOUL.md', 'AGENTS.md', 'TOOLS.md', 'MEMORY.md', 'HEARTBEAT.md'],
-  activeFileTab: 'SOUL.md',
+  activeFileTab: 'progress',
   setFileTabs: (tabs) => set({ fileTabs: tabs }),
   setActiveFileTab: (tab) => {
     set({ activeFileTab: tab });
     const { selectedAgentId } = get();
-    if (selectedAgentId) {
+    // Don't load file for 'progress' or 'skills' tabs
+    if (selectedAgentId && tab !== 'progress' && tab !== 'skills') {
       get().loadAgentFile(selectedAgentId, tab);
     }
   },

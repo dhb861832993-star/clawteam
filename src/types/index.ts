@@ -184,3 +184,110 @@ export interface TeamSwitchState {
   pendingTasks: string[];
   switchedAt: Date;
 }
+
+// ============= Phase 3: Workflow & Agent Collaboration =============
+
+// 工作流节点类型
+export type WorkflowNodeType = 'task' | 'decision' | 'parallel' | 'trigger' | 'end';
+
+// 工作流节点状态
+export type WorkflowNodeStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+
+// 工作流节点
+export interface WorkflowNodeData {
+  id: string;
+  name: string;
+  type: WorkflowNodeType;
+  status: WorkflowNodeStatus;
+  assignedAgentId?: string;
+  assignedAgentName?: string;
+  assignedAgentAvatar?: string;
+  progress: number; // 0-100
+  startedAt?: Date;
+  completedAt?: Date;
+  output?: string;
+  error?: string;
+  dependencies: string[]; // 依赖的节点 ID
+}
+
+// 工作流边
+export interface WorkflowEdge {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  condition?: string;
+  animated?: boolean;
+}
+
+// 工作流执行实例
+export interface WorkflowExecution {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'paused';
+  nodes: WorkflowNodeData[];
+  edges: WorkflowEdge[];
+  progress: number; // 0-100
+  currentNodeId?: string;
+  startedAt?: Date;
+  completedAt?: Date;
+  createdAt: Date;
+}
+
+// Agent 协作消息
+export interface AgentCollaborationMessage {
+  id: string;
+  fromAgentId: string;
+  fromAgentName: string;
+  fromAgentAvatar: string;
+  toAgentId: string;
+  toAgentName: string;
+  toAgentAvatar: string;
+  type: 'task' | 'file' | 'message' | 'notification';
+  content: string;
+  status: 'pending' | 'delivered' | 'processing' | 'completed';
+  timestamp: Date;
+}
+
+// Agent 协作关系
+export interface AgentCollaborationEdge {
+  source: string;
+  target: string;
+  messageCount: number;
+  fileCount: number;
+  lastActivity?: Date;
+  active: boolean;
+}
+
+// 任务执行详情
+export interface TaskExecutionDetail {
+  taskId: string;
+  taskName: string;
+  workflowId?: string;
+  workflowName?: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'blocked';
+  progress: number;
+  currentNodeId?: string;
+  currentNodeName?: string;
+  currentAgentId?: string;
+  currentAgentName?: string;
+  currentAgentAvatar?: string;
+  steps: TaskExecutionStep[];
+  startedAt?: Date;
+  completedAt?: Date;
+  estimatedRemaining?: number; // seconds
+}
+
+// 任务执行步骤
+export interface TaskExecutionStep {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  agentId?: string;
+  agentName?: string;
+  agentAvatar?: string;
+  progress: number;
+  startedAt?: Date;
+  completedAt?: Date;
+  output?: string;
+}

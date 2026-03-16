@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer, SkillsPanel, CommunicationPanel, SettingsPanel, TeamsPanel, WorkflowEditor } from './components';
+import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer, SkillsPanel, CommunicationPanel, SettingsPanel, TeamsPanel, WorkflowEditor, WorkflowExecutionPanel, AgentCollaborationView } from './components';
 import { useTeamStore } from './stores/teamStore';
 import { useHealthStore } from './stores/healthStore';
 
@@ -19,6 +19,8 @@ function App() {
   const [showCommunication, setShowCommunication] = useState(false);
   const [showTeams, setShowTeams] = useState(false);
   const [showWorkflow, setShowWorkflow] = useState(false);
+  const [showWorkflowExecution, setShowWorkflowExecution] = useState(false);
+  const [showAgentCollaboration, setShowAgentCollaboration] = useState(false);
 
   const { teams, currentTeamId, loadTeams } = useTeamStore();
   const { startMonitoring, stopMonitoring } = useHealthStore();
@@ -75,6 +77,18 @@ function App() {
                 className="px-4 py-2 bg-accent-orange/20 text-accent-orange rounded-lg font-mono text-xs hover:bg-accent-orange/30 transition-all border border-accent-orange/50"
               >
                 📊 Workflow
+              </button>
+              <button
+                onClick={() => setShowWorkflowExecution(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                ⚡ 执行监控
+              </button>
+              <button
+                onClick={() => setShowAgentCollaboration(true)}
+                className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
+              >
+                🔗 协作视图
               </button>
               <button
                 onClick={() => setShowSkills(true)}
@@ -146,6 +160,12 @@ function App() {
 
       {/* Workflow Editor Modal */}
       <WorkflowEditor isOpen={showWorkflow} onClose={() => setShowWorkflow(false)} />
+
+      {/* Workflow Execution Panel Modal */}
+      <WorkflowExecutionPanel isOpen={showWorkflowExecution} onClose={() => setShowWorkflowExecution(false)} />
+
+      {/* Agent Collaboration View Modal */}
+      <AgentCollaborationView isOpen={showAgentCollaboration} onClose={() => setShowAgentCollaboration(false)} />
     </main>
   );
 }

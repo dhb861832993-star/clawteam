@@ -3,6 +3,7 @@ import Editor from '@monaco-editor/react';
 import { clsx } from 'clsx';
 import { useAppStore } from '../stores/appStore';
 import { AgentSkillsPanel } from './AgentSkillsPanel';
+import { TaskProgressTracker } from './TaskProgressTracker';
 import type { PanelMode, Agent, Message, Log } from '../types';
 
 const modeConfig: Record<PanelMode, { icon: string; label: string }> = {
@@ -231,11 +232,22 @@ export function RightPanel() {
           )}
 
           {/* Tabs */}
-          <div className="flex border-b border-dark-700">
+          <div className="flex border-b border-dark-700 overflow-x-auto">
+            <button
+              onClick={() => setActiveFileTab('progress')}
+              className={clsx(
+                'px-4 py-2 text-xs font-mono transition-all whitespace-nowrap',
+                activeFileTab === 'progress'
+                  ? 'text-accent-orange border-b-2 border-accent-orange'
+                  : 'text-gray-500 hover:text-gray-400'
+              )}
+            >
+              ⚡ 任务进度
+            </button>
             <button
               onClick={() => setActiveFileTab('skills')}
               className={clsx(
-                'px-4 py-2 text-xs font-mono transition-all',
+                'px-4 py-2 text-xs font-mono transition-all whitespace-nowrap',
                 activeFileTab === 'skills'
                   ? 'text-accent-orange border-b-2 border-accent-orange'
                   : 'text-gray-500 hover:text-gray-400'
@@ -248,7 +260,7 @@ export function RightPanel() {
                 key={tab}
                 onClick={() => setActiveFileTab(tab)}
                 className={clsx(
-                  'px-4 py-2 text-xs font-mono transition-all',
+                  'px-4 py-2 text-xs font-mono transition-all whitespace-nowrap',
                   activeFileTab === tab
                     ? 'text-accent-orange border-b-2 border-accent-orange'
                     : 'text-gray-500 hover:text-gray-400'
@@ -260,7 +272,11 @@ export function RightPanel() {
           </div>
 
           {/* Content */}
-          {activeFileTab === 'skills' && selectedAgent ? (
+          {activeFileTab === 'progress' ? (
+            <div className="flex-1 overflow-y-auto p-4">
+              <TaskProgressTracker />
+            </div>
+          ) : activeFileTab === 'skills' && selectedAgent ? (
             <AgentSkillsPanel
               agentId={selectedAgent.id}
               agentName={selectedAgent.name}

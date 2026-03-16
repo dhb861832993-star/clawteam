@@ -24,3 +24,8 @@ export { OfflineAlert } from './OfflineAlert';
 export { PerformanceMetrics } from './PerformanceMetrics';
 export { SkillLibrary } from './SkillLibrary';
 export { BatchPermissions } from './BatchPermissions';
+
+// P2 组件 - 工作流与 Agent 协作可视化
+export { WorkflowExecutionPanel } from './WorkflowExecutionPanel';
+export { AgentCollaborationView } from './AgentCollaborationView';
+export { TaskProgressTracker } from './TaskProgressTracker';
