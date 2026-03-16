@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { clsx } from 'clsx';
 import { useAppStore } from '../stores/appStore';
+import { AgentSkillsPanel } from './AgentSkillsPanel';
 import type { PanelMode, Agent, Message, Log } from '../types';
 
 const modeConfig: Record<PanelMode, { icon: string; label: string }> = {
@@ -215,20 +216,72 @@ export function RightPanel() {
       )}
 
       {panelMode === 'properties' && (
-        <PropertiesPanel
-          fileTabs={fileTabs}
-          activeFileTab={activeFileTab}
-          setActiveFileTab={setActiveFileTab}
-          fileContent={fileContent}
-          onContentChange={handleContentChange}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          onSave={handleSave}
-          isSaved={isSaved}
-          fileLoading={fileLoading}
-          fileSaving={fileSaving}
-          fileError={fileError}
-        />
+        <div className="flex-1 flex flex-col">
+          {/* Agent Info Header */}
+          {selectedAgent && (
+            <div className="p-4 border-b border-dark-700">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">{selectedAgent.avatar}</span>
+                <div>
+                  <h3 className="text-lg font-mono text-white">{selectedAgent.name}</h3>
+                  <p className="text-xs text-gray-500">{selectedAgent.role}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tabs */}
+          <div className="flex border-b border-dark-700">
+            <button
+              onClick={() => setActiveFileTab('skills')}
+              className={clsx(
+                'px-4 py-2 text-xs font-mono transition-all',
+                activeFileTab === 'skills'
+                  ? 'text-accent-orange border-b-2 border-accent-orange'
+                  : 'text-gray-500 hover:text-gray-400'
+              )}
+            >
+              🧩 技能管理
+            </button>
+            {fileTabs.map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveFileTab(tab)}
+                className={clsx(
+                  'px-4 py-2 text-xs font-mono transition-all',
+                  activeFileTab === tab
+                    ? 'text-accent-orange border-b-2 border-accent-orange'
+                    : 'text-gray-500 hover:text-gray-400'
+                )}
+              >
+                📄 {tab.replace('.md', '')}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          {activeFileTab === 'skills' && selectedAgent ? (
+            <AgentSkillsPanel
+              agentId={selectedAgent.id}
+              agentName={selectedAgent.name}
+            />
+          ) : (
+            <PropertiesPanel
+              fileTabs={fileTabs}
+              activeFileTab={activeFileTab}
+              setActiveFileTab={setActiveFileTab}
+              fileContent={fileContent}
+              onContentChange={handleContentChange}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              onSave={handleSave}
+              isSaved={isSaved}
+              fileLoading={fileLoading}
+              fileSaving={fileSaving}
+              fileError={fileError}
+            />
+          )}
+        </div>
       )}
 
       {panelMode === 'logs' && (

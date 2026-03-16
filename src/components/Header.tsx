@@ -4,10 +4,11 @@ interface HeaderProps {
   onOpenSkills?: () => void;
   onOpenSettings?: () => void;
   onOpenTeams?: () => void;
+  onOpenWorkflow?: () => void;
   currentTeamName?: string;
 }
 
-export function Header({ onOpenSkills, onOpenSettings, onOpenTeams, currentTeamName }: HeaderProps) {
+export function Header({ onOpenSkills, onOpenSettings, onOpenTeams, onOpenWorkflow, currentTeamName }: HeaderProps) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -50,6 +51,14 @@ export function Header({ onOpenSkills, onOpenSettings, onOpenTeams, currentTeamN
       <div className="flex items-center gap-6">
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenWorkflow}
+            className="flex items-center gap-2 px-4 py-2 bg-accent-orange/20 border border-accent-orange/50 rounded-lg hover:border-accent-orange transition-all group"
+            title="Workflow Editor"
+          >
+            <span className="text-lg">📊</span>
+            <span className="text-sm font-mono text-accent-orange group-hover:text-white transition-colors">Workflow</span>
+          </button>
           <button
             onClick={onOpenSkills}
             className="flex items-center gap-2 px-4 py-2 bg-dark-800 border border-dark-600 rounded-lg hover:border-accent-orange/50 transition-all group"

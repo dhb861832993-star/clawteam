@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer, SkillsPanel, CommunicationPanel, SettingsPanel, TeamsPanel } from './components';
+import { Header, AgentGrid, TaskProgress, TaskInput, RightPanel, ToastContainer, SkillsPanel, CommunicationPanel, SettingsPanel, TeamsPanel, WorkflowEditor } from './components';
 import { useTeamStore } from './stores/teamStore';
 import { useHealthStore } from './stores/healthStore';
 
@@ -18,6 +18,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showCommunication, setShowCommunication] = useState(false);
   const [showTeams, setShowTeams] = useState(false);
+  const [showWorkflow, setShowWorkflow] = useState(false);
 
   const { teams, currentTeamId, loadTeams } = useTeamStore();
   const { startMonitoring, stopMonitoring } = useHealthStore();
@@ -44,6 +45,7 @@ function App() {
         onOpenSkills={() => setShowSkills(true)}
         onOpenSettings={() => setShowSettings(true)}
         onOpenTeams={() => setShowTeams(true)}
+        onOpenWorkflow={() => setShowWorkflow(true)}
         currentTeamName={currentTeamName}
       />
 
@@ -68,6 +70,12 @@ function App() {
               🚀 Quick Actions
             </h3>
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setShowWorkflow(true)}
+                className="px-4 py-2 bg-accent-orange/20 text-accent-orange rounded-lg font-mono text-xs hover:bg-accent-orange/30 transition-all border border-accent-orange/50"
+              >
+                📊 Workflow
+              </button>
               <button
                 onClick={() => setShowSkills(true)}
                 className="px-4 py-2 bg-dark-700 text-gray-400 rounded-lg font-mono text-xs hover:bg-dark-600 hover:text-white transition-all"
@@ -135,6 +143,9 @@ function App() {
 
       {/* Toast Notifications */}
       <ToastContainer />
+
+      {/* Workflow Editor Modal */}
+      <WorkflowEditor isOpen={showWorkflow} onClose={() => setShowWorkflow(false)} />
     </main>
   );
 }

@@ -26,8 +26,9 @@ interface AppState {
   panelMode: PanelMode;
   setPanelMode: (mode: PanelMode) => void;
 
-  // Messages
+  // Messages (stored per agent)
   messages: Message[];
+  messagesByAgent: Record<string, Message[]>;
   addMessage: (message: Message) => void;
   sendChatMessage: (agentId: string, message: string) => Promise<void>;
   clearMessages: () => void;
@@ -73,9 +74,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   agentsError: null,
   setAgents: (agents) => set({ agents }),
   selectAgent: (id) => {
+    const state = get();
     set({ selectedAgentId: id });
-    // Clear messages when selecting a new agent
-    set({ messages: [] });
+    
+    // Load messages for the selected agent
+    if (id && state.messagesByAgent[id]) {
+      set({ messages: state.messagesByAgent[id] });
+    } else {
+      set({ messages: [] });
+    }
+    
     // Load the default file for the selected agent
     if (id) {
       get().loadAgentFile(id, 'SOUL.md');
@@ -140,8 +148,22 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // Messages
   messages: [],
-  addMessage: (message) =>
-    set((state) => ({ messages: [...state.messages, message] })),
+  messagesByAgent: {},
+  addMessage: (message) => {
+    const state = get();
+    const agentId = state.selectedAgentId || 'unknown';
+    
+    // Update global messages
+    set((state) => ({ messages: [...state.messages, message] }));
+    
+    // Update messages by agent
+    set((state) => ({
+      messagesByAgent: {
+        ...state.messagesByAgent,
+        [agentId]: [...(state.messagesByAgent[agentId] || []), message],
+      },
+    }));
+  },
   sendChatMessage: async (agentId: string, message: string) => {
     const state = get();
     const agent = state.agents.find(a => a.id === agentId);
@@ -156,6 +178,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       timestamp: new Date(),
     };
     set((state) => ({ messages: [...state.messages, userMessage] }));
+    
+    // Also save to agent-specific messages
+    set((state) => ({
+      messagesByAgent: {
+        ...state.messagesByAgent,
+        [agentId]: [...(state.messagesByAgent[agentId] || []), userMessage],
+      },
+    }));
 
     try {
       const response = await sendMessageToAgent(agentId, message);
@@ -170,6 +200,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         timestamp: new Date(),
       };
       set((state) => ({ messages: [...state.messages, agentMessage] }));
+      
+      // Also save to agent-specific messages
+      set((state) => ({
+        messagesByAgent: {
+          ...state.messagesByAgent,
+          [agentId]: [...(state.messagesByAgent[agentId] || []), agentMessage],
+        },
+      }));
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       // Add error message
@@ -182,6 +220,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         timestamp: new Date(),
       };
       set((state) => ({ messages: [...state.messages, errorMessage] }));
+      
+      // Also save to agent-specific messages
+      set((state) => ({
+        messagesByAgent: {
+          ...state.messagesByAgent,
+          [agentId]: [...(state.messagesByAgent[agentId] || []), errorMessage],
+        },
+      }));
       toast.error(`Failed to send message: ${errorMsg}`);
     }
   },
