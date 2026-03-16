@@ -286,6 +286,170 @@
 
 ---
 
+## 📊 工作流与 Agent 绑定
+
+### 绑定方式
+
+在工作流编辑器中，可以将特定节点绑定到指定的 Agent 角色：
+
+```yaml
+# 工作流节点配置示例
+workflow:
+  name: "产品发布流程"
+  nodes:
+    - id: "requirement-analysis"
+      name: "需求分析"
+      assignedAgent: "analyst"      # 绑定分析师 Agent
+      skills: ["research", "docs"]
+
+    - id: "ui-design"
+      name: "UI 设计"
+      assignedAgent: "designer"     # 绑定设计师 Agent
+      skills: ["figma", "prototyping"]
+
+    - id: "frontend-dev"
+      name: "前端开发"
+      assignedAgent: "frontend-developer"  # 绑定前端开发者 Agent
+      skills: ["react", "typescript"]
+
+    - id: "backend-dev"
+      name: "后端开发"
+      assignedAgent: "backend-architect"   # 绑定后端架构师 Agent
+      skills: ["api", "database"]
+```
+
+### 绑定示例
+
+```
+[截图位置：工作流节点绑定界面]
+┌─────────────────────────────────────────────────────────────────┐
+│  工作流节点配置                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  节点名称: 前端开发                                             │
+│                                                                 │
+│  绑定 Agent:                                                    │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │ 🔍 选择 Agent 角色...                          [▼]        ││
+│  │                                                             ││
+│  │ 推荐选项:                                                   ││
+│  │   🎨 Frontend Developer - 擅长 React/Vue/Angular           ││
+│  │   🏗️ Backend Architect - 擅长 API/数据库                   ││
+│  │   🤖 AI Engineer - 擅长 ML/AI 集成                         ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│  所需技能:                                                      │
+│  ☑️ react       ☑️ typescript    ☐ testing    ☐ deployment    │
+│                                                                 │
+│  预计时长: [  30  ] 分钟                                        │
+│                                                                 │
+│  [取消] [保存]                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔗 Agent 协作关系
+
+### 协作关系类型
+
+| 关系类型 | 说明 | 示例 |
+|----------|------|------|
+| **顺序执行** | Agent A 完成后，Agent B 开始 | 分析师 → 写手 |
+| **并行执行** | 多个 Agent 同时执行 | 设计师 ∥ 开发者 |
+| **条件触发** | 满足条件时触发下一个 Agent | 审核通过 → 发布 |
+| **消息传递** | Agent 之间通信协作 | 队长 ↔ 成员 |
+
+### 典型协作模式
+
+#### 1. 瀑布式协作
+
+```yaml
+# 顺序执行的协作关系
+name: "内容发布流程"
+collaboration:
+  - from: "analyst"
+    to: "writer"
+    type: "sequential"
+    trigger: "analysis_complete"
+
+  - from: "writer"
+    to: "designer"
+    type: "sequential"
+    trigger: "content_ready"
+
+  - from: "designer"
+    to: "operator"
+    type: "sequential"
+    trigger: "design_approved"
+```
+
+#### 2. 并行协作
+
+```yaml
+# 并行执行的协作关系
+name: "产品开发流程"
+collaboration:
+  parallel:
+    - agents: ["frontend-developer", "backend-architect"]
+      sync_point: "integration"
+
+  - from: "integration"
+    to: "tester"
+    type: "sequential"
+```
+
+#### 3. 中心辐射式协作
+
+```yaml
+# 以队长为中心的协作关系
+name: "团队协作模式"
+collaboration:
+  hub: "leader"
+  spokes:
+    - "frontend-developer"
+    - "backend-architect"
+    - "designer"
+    - "analyst"
+  communication: "broadcast"  # 队长广播消息给所有成员
+```
+
+### 协作关系可视化
+
+```
+[截图位置：协作关系图示例]
+┌─────────────────────────────────────────────────────────────────┐
+│  🔗 Agent 协作关系图 - 内容创作团队                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                      ┌─────────────┐                           │
+│                      │   🦁 队长   │                           │
+│                      │   LEADER    │                           │
+│                      │  (协调者)   │                           │
+│                      └──────┬──────┘                           │
+│                             │                                   │
+│           ┌─────────────────┼─────────────────┐               │
+│           │                 │                 │               │
+│           ▼                 ▼                 ▼               │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐         │
+│  │  📊 分析师  │   │  ✍️ 写手    │   │  🎨 设计师  │         │
+│  │  ANALYST    │──▶│  WRITER     │──▶│  DESIGNER   │         │
+│  │             │   │             │   │             │         │
+│  └─────────────┘   └─────────────┘   └──────┬──────┘         │
+│                                             │                 │
+│                                             ▼                 │
+│                                    ┌─────────────┐           │
+│                                    │  ⚙️ 运营    │           │
+│                                    │  OPERATOR   │           │
+│                                    │             │           │
+│                                    └─────────────┘           │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  图例: ──▶ 顺序执行    ═══▶ 并行执行    - -▶ 条件触发         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 📋 完整列表
 
 参考完整仓库：https://github.com/msitarzewski/agency-agents

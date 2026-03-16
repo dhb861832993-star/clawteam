@@ -23,6 +23,11 @@
 - **文件管理** - 编辑 Agent 配置文件（SOUL.md、AGENTS.md 等）
 - **聊天交互** - 向 Agent 发送消息并查看响应
 - **日志查看** - 实时追踪 Agent 活动日志
+- **📊 工作流编辑器** - 可视化拖拽创建和管理复杂工作流
+- **🧩 技能管理** - 从 ClawHub 市场安装和管理 Agent 技能
+- **⚡ 执行监控** - 实时追踪工作流执行状态和进度
+- **🔗 协作视图** - 可视化 Agent 之间的协作关系图
+- **💬 聊天记忆** - 自动保存对话历史，支持上下文恢复
 
 ![Dashboard 预览](docs/dashboard-preview.png)
 
@@ -149,6 +154,11 @@ npm run lint         # 运行 ESLint 检查
 - **File Management** - Edit agent configuration files (SOUL.md, AGENTS.md, etc.)
 - **Chat Interface** - Send messages to agents and view responses
 - **Log Viewer** - Track agent activity in real-time
+- **📊 Workflow Editor** - Visual drag-and-drop workflow creation and management
+- **🧩 Skills Management** - Install and manage agent skills from ClawHub marketplace
+- **⚡ Execution Monitor** - Real-time workflow execution tracking
+- **🔗 Collaboration View** - Visualize agent collaboration relationships
+- **💬 Chat Memory** - Auto-save conversation history with context recovery
 
 ### Quick Start
 
